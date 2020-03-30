@@ -1,9 +1,19 @@
 DECLARE
 	this_event_type event_type;
+	this_bracket_depth smallint;
 	
 	this_row_result scores;
 	this_row_array varchar(255)[];
+	
+	this_placements_array smallint[16];
+	
+	this_seen_elements boolean[16];
+	this_extreme integer;
+	this_extreme_last integer;
+	this_extreme_index integer;
+	this_curr_place integer;
 	this_is_empty boolean;
+	
 BEGIN
 	
 	-- GET SCORES
@@ -31,20 +41,43 @@ BEGIN
 						  	this_row_result.score_id_13,
 						  	this_row_result.score_id_14,
 						  	this_row_result.score_id_15];
-	-- RAISE EXCEPTION '%', CAST (array[NULL] AS varchar(255)[]); -- DEBUG
-	-- DETERMINE IS ALL SCORES ARE IN [TODO]
+
+	-- GET EVENT TYPE
+	SELECT event_type, bracket_depth FROM events INTO this_event_type, this_bracket_depth WHERE events.id = event_id_param;
+	
+	-- DETERMINE IS ALL SCORES ARE IN
 	SELECT bool_or(a is null) FROM unnest(this_row_array) s(a) INTO this_is_empty;
 	
 	IF this_is_empty THEN
 		RAISE EXCEPTION 'Scores are not all in for event: %', event_id_param;
 	END IF;
 	
-	RAISE NOTICE '%', this_row_array;
-	
-	-- GET EVENT TYPE
-	SELECT event_type FROM events INTO this_event_type WHERE events.id = event_id_param;
-	
-	
+	-- DETERMINE IF BRACKET HAS ALL SCORES IN
+	IF this_event_type = 'BRACKET' THEN
+		CASE this_bracket_depth
+			WHEN 4 THEN
+				IF NOT this_row_array @> CAST(array['1111', '1101'] as varchar(255)[]) THEN
+					RAISE EXCEPTION 'Bracket not completed for event: %', event_id_param;
+				END IF;
+			WHEN 3 THEN
+				IF NOT this_row_array @> CAST(array['111', '101'] as varchar(255)[]) THEN
+					RAISE EXCEPTION 'Bracket not completed for event: %', event_id_param;
+				END IF;
+			WHEN 2 THEN
+				IF NOT this_row_array @> CAST(array['11'] as varchar(255)[]) THEN
+					RAISE EXCEPTION 'Bracket not completed for event: %', event_id_param;
+				END IF;
+			WHEN 1 THEN
+				IF NOT this_row_array @> CAST(array['1'] as varchar(255)[]) THEN
+					RAISE EXCEPTION 'Bracket not completed for event: %', event_id_param;
+				END IF;
+			ELSE
+		END CASE;
+	END IF;
+		
+	RAISE NOTICE '%', this_row_array;	--	DEBUG
+
+
 	-- HANDLE DIFFERENT KINDS OF EVENTS
 	CASE this_event_type
 		WHEN 'MAX' THEN
@@ -54,7 +87,34 @@ BEGIN
 		WHEN 'TOP' THEN
 			RAISE EXCEPTION 'TOP has not be implemented in scores_to_placements';
 		WHEN 'BRACKET' THEN
-			RAISE EXCEPTION 'BRACKET has not be implemented in scores_to_placements';
+			this_extreme = -1;
+			this_extreme_last = -2;
+			this_extreme_index = -1;
+			this_curr_place = 1;
+			this_seen_elements = array_fill(FALSE, array[16]);
+			
+			FOR i IN 1..16 LOOP
+				RAISE NOTICE 'Run: %', i;
+				FOR j IN 1..16 LOOP
+					IF NOT this_seen_elements[j] AND this_extreme < CAST(this_row_array[j] as integer) THEN
+						this_extreme = CAST(this_row_array[j] as integer);
+						this_extreme_index = j;
+						RAISE NOTICE '% % % %', i, j, this_extreme, this_extreme_index;
+					END IF;
+				END LOOP;
+				IF this_extreme != this_extreme_last THEN
+					this_curr_place = i;
+				END IF;
+				
+				this_extreme_last = this_extreme;
+				this_extreme = -1;
+				this_placements_array[this_extreme_index] = this_curr_place;
+				this_seen_elements[this_extreme_index] = TRUE;
+			END LOOP;
+			
+			RAISE NOTICE '%', this_placements_array;
+			
+			-- RAISE EXCEPTION 'BRACKET has not be implemented in scores_to_placements'; -- DEBUG REMOVE
 		ELSE
 			RAISE EXCEPTION 'Invalid event_type: %', this_event_type;
 	END CASE;
