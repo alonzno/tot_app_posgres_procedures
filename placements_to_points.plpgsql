@@ -97,5 +97,27 @@ BEGIN
 		END LOOP;
 	END IF;
 	
+	-- UPDATE POINTS
+	UPDATE points SET
+		points_id_0  = this_point_array[1],
+		points_id_1  = this_point_array[2],
+		points_id_2  = this_point_array[3],
+		points_id_3  = this_point_array[4],
+		points_id_4  = this_point_array[5],
+		points_id_5  = this_point_array[6],
+		points_id_6  = this_point_array[7],
+		points_id_7  = this_point_array[8],
+		points_id_8  = this_point_array[9],
+		points_id_9  = this_point_array[10],
+		points_id_10 = this_point_array[11],
+		points_id_11 = this_point_array[12],
+		points_id_12 = this_point_array[13],
+		points_id_13 = this_point_array[14],
+		points_id_14 = this_point_array[15],
+		points_id_15 = this_point_array[16]
+	WHERE
+		points.event_id = event_id_param;
+	
+	-- DEBUG / REMOVE
 	RAISE NOTICE '% % % % % %', this_row_array, this_spread_array, this_point_array, this_event_type, this_tie_count, this_team_size;
 END top_block;
