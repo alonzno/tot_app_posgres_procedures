@@ -1,4 +1,3 @@
-<<top_block>>
 DECLARE
 	-- THESE ARE THE TYPES OF SCORING SPREADS, CHANGING THESE CHANGES SCORING MECHANICS
 	TYPE_A integer[] := array[21,15,9,6, 4,2,1,1, 0,0,0,0, 0,0,0,0];
@@ -30,7 +29,8 @@ BEGIN
 	
 	-- HANDLE ROW DOESN'T EXIST(EXIT IF DOESN'T)
 	IF this_row_result IS NULL THEN
-		RAISE EXCEPTION 'The following event does not exist in table placements: %', event_id_param;
+		RAISE WARNING 'The following event does not exist in table placements: %', event_id_param;
+		RETURN;
 	END IF;
 	
 	-- CONVERT ROW TO ARRAY
@@ -67,7 +67,8 @@ BEGIN
 		WHEN 'TYPE_E' THEN 
 			this_spread_array = TYPE_E;
 		ELSE
-			RAISE EXCEPTION 'Not a valid score spread: %', this_score_spread;
+			RAISE WARNING 'Not a valid score spread: %', this_score_spread;
+			RETURN;
 	END CASE;
 	
 	-- GET TEAM SIZE
@@ -119,5 +120,5 @@ BEGIN
 		points.event_id = event_id_param;
 	
 	-- DEBUG / REMOVE
-	RAISE NOTICE '% % % % % %', this_row_array, this_spread_array, this_point_array, this_event_type, this_tie_count, this_team_size;
-END top_block;
+	RAISE DEBUG '% % % % % %', this_row_array, this_spread_array, this_point_array, this_event_type, this_tie_count, this_team_size;
+END;
