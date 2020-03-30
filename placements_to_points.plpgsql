@@ -1,6 +1,6 @@
 <<top_block>>
 DECLARE
-	-- THESE ARE THE TYPES OF SCORING SPREADS, CHANGING THESE CHANGE SCORING MECHANICS
+	-- THESE ARE THE TYPES OF SCORING SPREADS, CHANGING THESE CHANGES SCORING MECHANICS
 	TYPE_A integer[] := array[21,15,9,6, 4,2,1,1, 0,0,0,0, 0,0,0,0];
 	TYPE_B integer[] := array[21,15,9,6, 2,0,0,0, 0,0,0,0, 0,0,0,0];
 	TYPE_C integer[] := array[16,9,3,3,  0,0,0,0, 0,0,0,0, 0,0,0,0];
@@ -16,10 +16,11 @@ DECLARE
 	this_score_spread score_spread;
 	this_spread_array int[];
 	
-	this_point_array int[16];
+	this_point_array real[16];
 	
 	this_team_size smallint;
 	this_tie_count smallint;
+	this_score_sum smallint := 0;
 	
 	this_event_type event_type;
 	
@@ -80,8 +81,13 @@ BEGIN
 		FOR i IN 1..16 LOOP
 			-- GET COUNT
 			this_tie_count = array_length(array_positions(this_row_array, this_row_array[i]), 1);
-
-			this_point_array[i] = this_spread_array[CAST (this_row_array[i] AS integer)] / (this_tie_count / this_team_size);
+			
+			FOR j IN 0..(this_tie_count - 1) LOOP
+				this_score_sum = this_score_sum + this_spread_array[CAST (this_row_array[i] AS integer) + j];
+			END LOOP;
+			
+			this_point_array[i] = this_score_sum::real / (this_tie_count / this_team_size)::real;
+			this_score_sum = 0;
 		END LOOP;
 		
 	-- HANDLE SCORING BRACKET, TOP EVENTS
