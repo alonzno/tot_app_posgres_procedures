@@ -6,6 +6,7 @@ DECLARE
 	this_row_array integer[];
 	
 	this_placements_array smallint[16];
+	this_team_size smallint;
 	
 	this_seen_elements boolean[16];
 	this_extreme integer;
@@ -77,6 +78,8 @@ BEGIN
 		
 	RAISE NOTICE '%', this_row_array;	--	DEBUG
 
+	-- GET TEAM SIZE
+	SELECT team_size FROM events INTO this_team_size WHERE events.id = event_id_param;
 
 	-- HANDLE DIFFERENT KINDS OF EVENTS
 	CASE this_event_type
@@ -84,7 +87,7 @@ BEGIN
 			this_extreme = 2147483647;
 			this_extreme_last = -2;
 			this_extreme_index = -1;
-			this_curr_place = 1;
+			this_curr_place = 0;
 			this_seen_elements = array_fill(FALSE, array[16]);
 			
 			FOR i IN 1..16 LOOP
@@ -97,7 +100,11 @@ BEGIN
 					END IF;
 				END LOOP;
 				IF this_extreme != this_extreme_last THEN
-					this_curr_place = i;
+					IF this_team_size = 1 THEN
+						this_curr_place = i;
+					ELSE
+						this_curr_place = (i+1) / this_team_size;
+					END IF;
 				END IF;
 				
 				this_extreme_last = this_extreme;
@@ -108,7 +115,39 @@ BEGIN
 			
 			RAISE NOTICE '%', this_placements_array;
 			
-			WHEN 'MAX', 'TOP', 'BRACKET' THEN
+		WHEN 'MAX' THEN
+			this_extreme = -1;
+			this_extreme_last = -2;
+			this_extreme_index = -1;
+			this_curr_place = 0;
+			this_seen_elements = array_fill(FALSE, array[16]);
+			
+			FOR i IN 1..16 LOOP
+				RAISE NOTICE 'Run: %', i;
+				FOR j IN 1..16 LOOP
+					IF NOT this_seen_elements[j] AND this_extreme < this_row_array[j] THEN
+						this_extreme = this_row_array[j];
+						this_extreme_index = j;
+						RAISE NOTICE '% % % %', i, j, this_extreme, this_extreme_index;
+					END IF;
+				END LOOP;
+				IF this_extreme != this_extreme_last THEN
+					IF this_team_size = 1 THEN
+						this_curr_place = i;
+					ELSE
+						this_curr_place = (i+1) / this_team_size;
+					END IF;
+				END IF;
+				
+				this_extreme_last = this_extreme;
+				this_extreme = -1;
+				this_placements_array[this_extreme_index] = this_curr_place;
+				this_seen_elements[this_extreme_index] = TRUE;
+			END LOOP;
+			
+			RAISE NOTICE '%', this_placements_array;
+			
+		WHEN 'TOP', 'BRACKET' THEN
 			this_extreme = -1;
 			this_extreme_last = -2;
 			this_extreme_index = -1;

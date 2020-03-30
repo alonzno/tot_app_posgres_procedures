@@ -80,13 +80,13 @@ BEGIN
 		-- Fill point array
 		FOR i IN 1..16 LOOP
 			-- GET COUNT
-			this_tie_count = array_length(array_positions(this_row_array, this_row_array[i]), 1);
+			this_tie_count = array_length(array_positions(this_row_array, this_row_array[i]), 1) / this_team_size;
 			
 			FOR j IN 0..(this_tie_count - 1) LOOP
 				this_score_sum = this_score_sum + this_spread_array[CAST (this_row_array[i] AS integer) + j];
 			END LOOP;
 			
-			this_point_array[i] = this_score_sum::real / (this_tie_count / this_team_size)::real;
+			this_point_array[i] = this_score_sum::real / this_tie_count::real;
 			this_score_sum = 0;
 		END LOOP;
 		
