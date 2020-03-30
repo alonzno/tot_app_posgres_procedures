@@ -1,0 +1,62 @@
+DECLARE
+	this_event_type event_type;
+	
+	this_row_result scores;
+	this_row_array varchar(255)[];
+	this_is_empty boolean;
+BEGIN
+	
+	-- GET SCORES
+	SELECT * FROM scores INTO this_row_result WHERE scores.event_id = event_id_param;
+	
+	-- HANDLE IF ROW DOESN'T EXIST
+	IF this_row_result IS NULL THEN
+		RAISE EXCEPTION 'There is no row in scores for event_id: %', event_id_param;
+	END IF;
+	
+	-- CONVERT ROW TO ARRAY
+	this_row_array = array[this_row_result.score_id_0,
+						  	this_row_result.score_id_1,
+						  	this_row_result.score_id_2,
+						 	this_row_result.score_id_3,
+						  	this_row_result.score_id_4,
+						  	this_row_result.score_id_5,
+						  	this_row_result.score_id_6,
+						  	this_row_result.score_id_7,
+						  	this_row_result.score_id_8,
+						  	this_row_result.score_id_9,
+						  	this_row_result.score_id_10,
+						  	this_row_result.score_id_11,
+						  	this_row_result.score_id_12,
+						  	this_row_result.score_id_13,
+						  	this_row_result.score_id_14,
+						  	this_row_result.score_id_15];
+	-- RAISE EXCEPTION '%', CAST (array[NULL] AS varchar(255)[]); -- DEBUG
+	-- DETERMINE IS ALL SCORES ARE IN [TODO]
+	SELECT bool_or(a is null) FROM unnest(this_row_array) s(a) INTO this_is_empty;
+	
+	IF this_is_empty THEN
+		RAISE EXCEPTION 'Scores are not all in for event: %', event_id_param;
+	END IF;
+	
+	RAISE NOTICE '%', this_row_array;
+	
+	-- GET EVENT TYPE
+	SELECT event_type FROM events INTO this_event_type WHERE events.id = event_id_param;
+	
+	
+	-- HANDLE DIFFERENT KINDS OF EVENTS
+	CASE this_event_type
+		WHEN 'MAX' THEN
+			RAISE EXCEPTION 'MAX has not be implemented in scores_to_placements';
+		WHEN 'MIN' THEN
+			RAISE EXCEPTION 'MIN has not be implemented in scores_to_placements';
+		WHEN 'TOP' THEN
+			RAISE EXCEPTION 'TOP has not be implemented in scores_to_placements';
+		WHEN 'BRACKET' THEN
+			RAISE EXCEPTION 'BRACKET has not be implemented in scores_to_placements';
+		ELSE
+			RAISE EXCEPTION 'Invalid event_type: %', this_event_type;
+	END CASE;
+	
+END;
