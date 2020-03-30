@@ -80,13 +80,9 @@ BEGIN
 
 	-- HANDLE DIFFERENT KINDS OF EVENTS
 	CASE this_event_type
-		WHEN 'MAX' THEN
-			RAISE EXCEPTION 'MAX has not be implemented in scores_to_placements';
 		WHEN 'MIN' THEN
 			RAISE EXCEPTION 'MIN has not be implemented in scores_to_placements';
-		WHEN 'TOP' THEN
-			RAISE EXCEPTION 'TOP has not be implemented in scores_to_placements';
-		WHEN 'BRACKET' THEN
+		WHEN 'MAX', 'TOP', 'BRACKET' THEN
 			this_extreme = -1;
 			this_extreme_last = -2;
 			this_extreme_index = -1;
@@ -118,5 +114,24 @@ BEGIN
 		ELSE
 			RAISE EXCEPTION 'Invalid event_type: %', this_event_type;
 	END CASE;
+	UPDATE placements SET
+		place_id_0 = this_placements_array[1],
+		place_id_1 = this_placements_array[2],
+		place_id_2 = this_placements_array[3],
+		place_id_3 = this_placements_array[4],
+		place_id_4 = this_placements_array[5],
+		place_id_5 = this_placements_array[6],
+		place_id_6 = this_placements_array[7],
+		place_id_7 = this_placements_array[8],
+		place_id_8 = this_placements_array[9],
+		place_id_9 = this_placements_array[10],
+		place_id_10 = this_placements_array[11],
+		place_id_11 = this_placements_array[12],
+		place_id_12 = this_placements_array[13],
+		place_id_13 = this_placements_array[14],
+		place_id_14 = this_placements_array[15],
+		place_id_15 = this_placements_array[16]
+	WHERE
+		event_id = event_id_param;
 	
 END;
