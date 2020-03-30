@@ -1,0 +1,23 @@
+BEGIN
+	FOR i IN 0..59 LOOP
+		UPDATE placements SET
+			place_id_0 = NULL,
+			place_id_1 = NULL,
+			place_id_2 = NULL,
+			place_id_3 = NULL,
+			place_id_4 = NULL,
+			place_id_5 = NULL,
+			place_id_6 = NULL,
+			place_id_7 = NULL,
+			place_id_8 = NULL,
+			place_id_9 = NULL,
+			place_id_10 = NULL,
+			place_id_11 = NULL,
+			place_id_12 = NULL,
+			place_id_13 = NULL,
+			place_id_14 = NULL,
+			place_id_15 = NULL
+		WHERE
+			event_id = i;
+	END LOOP;
+END;
