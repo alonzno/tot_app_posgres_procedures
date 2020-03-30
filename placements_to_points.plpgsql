@@ -1,0 +1,95 @@
+<<top_block>>
+DECLARE
+	-- THESE ARE THE TYPES OF SCORING SPREADS, CHANGING THESE CHANGE SCORING MECHANICS
+	TYPE_A integer[] := array[21,15,9,6, 4,2,1,1, 0,0,0,0, 0,0,0,0];
+	TYPE_B integer[] := array[21,15,9,6, 2,0,0,0, 0,0,0,0, 0,0,0,0];
+	TYPE_C integer[] := array[16,9,3,3,  0,0,0,0, 0,0,0,0, 0,0,0,0];
+	TYPE_D integer[] := array[10,6,0,0,  0,0,0,0, 0,0,0,0, 0,0,0,0];
+	TYPE_E integer[] := array[8,0,0,0,   0,0,0,0, 0,0,0,0, 0,0,0,0];
+	
+	-- TEMP VARIABLES
+	event_id_param smallint := event_id;
+	
+	this_row_result placements;
+	this_row_array varchar(255)[];
+	
+	this_score_spread score_spread;
+	this_spread_array int[];
+	
+	this_point_array int[16];
+	
+	this_team_size smallint;
+	this_tie_count smallint;
+	
+	this_event_type event_type;
+	
+BEGIN
+	-- GET ROW FROM PLACEMENTS
+	SELECT * FROM placements INTO this_row_result WHERE placements.event_id = event_id_param;
+	
+	-- HANDLE ROW DOESN'T EXIST(EXIT IF DOESN'T)
+	IF this_row_result IS NULL THEN
+		RAISE EXCEPTION 'The following event does not exist in table placements: %', event_id_param;
+	END IF;
+	
+	-- CONVERT ROW TO ARRAY
+	this_row_array = array[this_row_result.place_id_0,
+						    this_row_result.place_id_1,
+						    this_row_result.place_id_2,
+						    this_row_result.place_id_3,
+						    this_row_result.place_id_4,
+						    this_row_result.place_id_5,
+						    this_row_result.place_id_6,
+						    this_row_result.place_id_7,
+						    this_row_result.place_id_8,
+						    this_row_result.place_id_9,
+						    this_row_result.place_id_10,
+						    this_row_result.place_id_11,
+						    this_row_result.place_id_12,
+						    this_row_result.place_id_13,
+						    this_row_result.place_id_14,
+						    this_row_result.place_id_15]; 
+	
+	--	GET SCORE SPREAD ENUM OF EVENT
+	SELECT score_spread FROM events INTO this_score_spread WHERE events.id = event_id_param;
+	
+	-- CONVERT SCORE SPREAD ENUM TO ARRAY
+	CASE this_score_spread
+		WHEN 'TYPE_A' THEN 
+			this_spread_array = TYPE_A;
+		WHEN 'TYPE_B' THEN 
+			this_spread_array = TYPE_B;
+		WHEN 'TYPE_C' THEN 
+			this_spread_array = TYPE_C;
+		WHEN 'TYPE_D' THEN 
+			this_spread_array = TYPE_D;
+		WHEN 'TYPE_E' THEN 
+			this_spread_array = TYPE_E;
+		ELSE
+			RAISE EXCEPTION 'Not a valid score spread: %', this_score_spread;
+	END CASE;
+	
+	-- GET TEAM SIZE
+	SELECT team_size FROM events INTO this_team_size WHERE events.id = event_id_param;
+	--	GET EVENT TYPE
+	SELECT event_type FROM events INTO this_event_type WHERE events.id = event_id_param;
+	
+	-- HANDLE SCORING MAX, MIN EVENTS
+	IF this_event_type = 'MAX' OR this_event_type = 'MIN' THEN
+		-- Fill point array
+		FOR i IN 1..16 LOOP
+			-- GET COUNT
+			this_tie_count = array_length(array_positions(this_row_array, this_row_array[i]), 1);
+
+			this_point_array[i] = this_spread_array[CAST (this_row_array[i] AS integer)] / (this_tie_count / this_team_size);
+		END LOOP;
+		
+	-- HANDLE SCORING BRACKET, TOP EVENTS
+	ELSE
+		FOR i IN 1..16 LOOP
+			this_point_array[i] = this_spread_array[CAST (this_row_array[i] AS integer)];
+		END LOOP;
+	END IF;
+	
+	RAISE NOTICE '% % % % % %', this_row_array, this_spread_array, this_point_array, this_event_type, this_tie_count, this_team_size;
+END top_block;
