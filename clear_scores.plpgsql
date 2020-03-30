@@ -1,0 +1,23 @@
+BEGIN
+	FOR i IN 0..59 LOOP
+		UPDATE scores SET
+			score_id_0 = NULL,
+			score_id_1 = NULL,
+			score_id_2 = NULL,
+			score_id_3 = NULL,
+			score_id_4 = NULL,
+			score_id_5 = NULL,
+			score_id_6 = NULL,
+			score_id_7 = NULL,
+			score_id_8 = NULL,
+			score_id_9 = NULL,
+			score_id_10 = NULL,
+			score_id_11 = NULL,
+			score_id_12 = NULL,
+			score_id_13 = NULL,
+			score_id_14 = NULL,
+			score_id_15 = NULL
+		WHERE
+			event_id = i;
+	END LOOP;
+END;
