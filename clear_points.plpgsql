@@ -1,0 +1,23 @@
+BEGIN
+	FOR i IN 0..59 LOOP
+		UPDATE points SET
+			points_id_0 = NULL,
+			points_id_1 = NULL,
+			points_id_2 = NULL,
+			points_id_3 = NULL,
+			points_id_4 = NULL,
+			points_id_5 = NULL,
+			points_id_6 = NULL,
+			points_id_7 = NULL,
+			points_id_8 = NULL,
+			points_id_9 = NULL,
+			points_id_10 = NULL,
+			points_id_11 = NULL,
+			points_id_12 = NULL,
+			points_id_13 = NULL,
+			points_id_14 = NULL,
+			points_id_15 = NULL
+		WHERE
+			event_id = i;
+	END LOOP;
+END;
