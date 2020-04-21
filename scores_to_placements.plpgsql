@@ -122,6 +122,7 @@ BEGIN
 			FOR i IN 1..16 LOOP
 				RAISE LOG 'Run: %', i;
 				FOR j IN 1..16 LOOP
+					--	FIND SMALLEST ELEMENT THAT HAS NOT BEEN SEEN
 					IF NOT this_seen_elements[j] AND this_extreme > this_row_array[j] THEN
 						this_extreme = this_row_array[j];
 						this_extreme_index = j;
@@ -132,7 +133,8 @@ BEGIN
 					IF this_team_size = 1 THEN
 						this_curr_place = i;
 					ELSE
-						this_curr_place = (i+1) / this_team_size;
+						-- this_curr_place = (i+1) / this_team_size;
+						this_curr_place = ((i-1) / this_team_size) + 1;
 					END IF;
 				END IF;
 				
@@ -154,6 +156,7 @@ BEGIN
 			FOR i IN 1..16 LOOP
 				RAISE DEBUG 'Run: %', i;
 				FOR j IN 1..16 LOOP
+					--	FIND LARGEST ELEMENT THAT HAS NOT BEEN SEEN
 					IF NOT this_seen_elements[j] AND this_extreme < this_row_array[j] THEN
 						this_extreme = this_row_array[j];
 						this_extreme_index = j;
@@ -164,7 +167,8 @@ BEGIN
 					IF this_team_size = 1 THEN
 						this_curr_place = i;
 					ELSE
-						this_curr_place = (i+1) / this_team_size;
+						--this_curr_place = (i+1) / this_team_size;
+						this_curr_place = ((i-1) / this_team_size) + 1;
 					END IF;
 				END IF;
 				
