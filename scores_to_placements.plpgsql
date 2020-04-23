@@ -65,7 +65,7 @@ BEGIN
 					RETURN;
 				END IF;
 			WHEN 3 THEN
-				IF NOT this_row_array @> CAST(array[111, 101] as integer[]) THEN
+				IF NOT this_row_array @> CAST(array[111] as integer[]) THEN
 					RAISE WARNING 'Bracket not completed for event: %', event_id_param;
 					RETURN;
 				END IF;
