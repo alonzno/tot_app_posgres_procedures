@@ -1,0 +1,10 @@
+CREATE TEMP TABLE tmp_x (id smallint, category event_category, tags tag_type[]); -- but see below
+
+COPY tmp_x FROM '/Users/alonzoaltamirano/Downloads/ToTCategoriesV2.1_-_Sheet2.tsv' DELIMITER E'\t';
+
+UPDATE public.events
+SET    event_category = tmp_x.category, event_tags = tmp_x.tags
+FROM   tmp_x
+WHERE  public.events.id = tmp_x.id;
+
+DROP TABLE tmp_x; -- else it is dropped at end of session automatically
